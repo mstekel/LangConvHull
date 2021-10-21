@@ -56,11 +56,11 @@ for iter=1:NUM_ITER
         vtx_num_ta=length(index_this);
         
         %% Quickhull
-        %         t1=clock;
-        %           QH = convhulln(matA_p');
-        %         t2=clock;
-        %         time_qhull(iter)=time_qhull(iter)+etime(t2,t1);
-        %         vtx_num_qhull=length(unique(QH));
+        t1=clock;
+          QH = convhulln(matA_p');
+        t2=clock;
+        time_qhull(iter)=time_qhull(iter)+etime(t2,t1);
+        vtx_num_qhull=length(unique(QH));
     end
     
 
@@ -85,7 +85,7 @@ hold off;
 legend('show','Location','west')%,'Orientation','horizontal')
 
 savefile = ['perturbation_tests'  datestr(now,30) '.mat']
-save(savefile, 'mean_err_fast', 'mean_err_ta');
+save(savefile, 'mean_err_fast', 'mean_err_ta','runningtime');
 
 
 
