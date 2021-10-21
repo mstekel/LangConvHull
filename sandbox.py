@@ -53,8 +53,9 @@ matlab_points = matlab.double(points, (len(points), len(points[0])))
 print(np.array(points))
 
 indices = [int(i) for i in eng.AVTA_eps(matlab_points, 0.00001)[0]]
+indices = [i - 1 for i in indices]
 print(indices)
-basic_points = np.array([np.array(matlab_points[i - 1]) for i in indices])
+basic_points = np.array([np.array(matlab_points[i]) for i in indices])
 
 print(basic_points)
 print(len(basic_points))
