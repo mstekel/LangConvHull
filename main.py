@@ -1,16 +1,14 @@
 import sys
+
 sys.path.append(r'C:\matlabpy\Lib\site-packages')
 import numpy as np
-import matlab
 import matlab.engine
-import gensim
 from gensim.models.callbacks import CallbackAny2Vec
 from datetime import datetime
 from scipy.optimize import linprog
-import random
 import gensim.downloader as api
 
-base_len = 1000
+base_len = 10
 
 class EpochSaver(CallbackAny2Vec):
     '''Callback to save model after each epoch.'''
@@ -34,6 +32,11 @@ eng.addpath(s, nargout=0)
 # model = Word2Vec.load(MODEL_PATH)
 
 model = api.load('glove-wiki-gigaword-100')
+# df = pd.read_csv('./model/depDocNNSE50.tab', delimiter='\s+')
+# df['vector'] = df[df.columns.drop('#target')].agg(np.array, axis=1)
+# print(df[['#target', 'vector']])
+# exit(0)
+# model = namedtuple('_', 'vectors')()
 
 print(f'The vocabulary contains {model.vectors.shape[0]} word embeddings of length {model.vectors.shape[1]}')
 
@@ -43,28 +46,20 @@ mat = matlab.double(lst, (len(lst), len(lst[0])))
 
 print(f'{datetime.now().strftime("%H:%M:%S")}: Started computing the convex hull')
 indices = [int(i) for i in eng.AVTA_K(mat, base_len)[0]]
-
 print(f'{datetime.now().strftime("%H:%M:%S")}: Finished computing the convex hull')
-print(indices)
 
 #### SUPER IMPORTANT - the matlab indices are 1 based and therefore in python they must
 #### be reduced by 1
-basic_vectors = np.array([np.array(mat[i - 1]) for i in indices])
-basic_words = [model.similar_by_vector(v, topn=1)[0][0] for v in basic_vectors]
+indices = [i - 1 for i in indices]
 
+basic_vectors = np.array([model.vectors[i] for i in indices])
+basic_words = [model.index_to_key[i] for i in indices]
 
 def get_weights(points, x):
     n_points = len(points)
     c = np.zeros(n_points)
     A = np.r_[points.T, np.ones((1, n_points))]
     b = np.r_[x, np.ones(1)]
-    print('*************************************************************************************************************')
-    print(A)
-    print('*************************************************************************************************************')
-    print(b)
-    print('*************************************************************************************************************')
-    print(c)
-    print('*************************************************************************************************************')
     lp = linprog(c, A_eq=A, b_eq=b)
     return lp.x
 
